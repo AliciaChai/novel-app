@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小说书籍</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+:root{--paper:#F6F1E6;--id:#173052;--main-text:#112b4e;--second-text:#203957;--blue:#a4b6cd;--green:#cfe4dd;--ink:#5d4943;--ink-soft:#816158;--pine:#2F4A3D;--pine-deep:#321e27;--seal:#A93226;--gold:#C7A24B;--line:rgba(39,32,43,.14);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background-image:radial-gradient(circle at 1px 1px,rgba(43,38,32,.05) 1px,transparent 1.2px);background-size:22px 22px;color:var(--ink);font-family:'Noto Sans SC',sans-serif;min-height:100vh;padding-bottom:80px;background-color:var(--paper);}
+.hero{position:relative;height:270px;overflow:hidden;background-color:#b9c9da;}
+.hero::before{content:"";position:absolute;inset:-30px;background:radial-gradient(ellipse at 25% 30%,rgba(255,255,255,.28),transparent 45%),radial-gradient(ellipse at 75% 65%,rgba(255,255,255,.16),transparent 40%),radial-gradient(ellipse at 50% 100%,rgba(80,110,145,.10),transparent 55%),linear-gradient(135deg,#b9c9da,#b4c5d7 45%,#bdccdc);filter:url(#wrinkle);opacity:.95;transform:scale(1.05);}
+.hero::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 9px);opacity:.7;pointer-events:none;}
+.hero-content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.author{margin-bottom:8px;font-family:Arial,sans-serif;font-size:20px;letter-spacing:5px;color:var(--id);}
+.hero h1{margin-bottom:30px;margin-top:10px;font-family:"Songti SC","STSong","SimSun",serif;font-size:58px;font-weight:700;letter-spacing:5px;color:var(--main-text);}
+.location{font-family:"Songti SC","STSong","SimSun",serif;font-size:15px;letter-spacing:8px;color:var(--second-text);margin-top:-10px;}
+.tabbar{display:flex;justify-content:center;gap:10;margin:34px auto 8px;max-width:500px;margin-top:-130px;border-bottom:1px solid var(--line);}
+.tab{flex:1;text-align:center;padding:12px 10px 14px;font-family:'Noto Serif SC',serif;font-size:17px;font-weight:600;color:var(--second-text);cursor:pointer;position:relative;transition:color .25s ease;background:none;border:none;}
+.tab.active{color:var(--main-text);}
+.tab.active::after{content:"";position:absolute;left:20%;right:20%;bottom:-1px;height:3px;background:var(--seal);border-radius:3px;}
+.tab .count{font-family:'Noto Sans SC',sans-serif;font-size:11px;color:var(--second-text);margin-left:4px;}
+.toolbar{max-width:1100px;margin:22px auto 0;padding:0 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.toolbar-note{font-size:12.5px;color:var(--ink-soft);}
+.upload-btn{background:var(--main-text);color:var(--paper);border:none;padding:11px 22px;border-radius:3px;font-family:'Noto Serif SC',serif;font-size:14px;font-weight:600;letter-spacing:1px;cursor:pointer;box-shadow:0 2px 0 var(--blue);transition:transform .15s ease,box-shadow .15s ease;}
+.upload-btn:hover{transform:translateY(-1px);box-shadow:0 3px 0 var(--blue);}
+.upload-btn:active{transform:translateY(1px);box-shadow:0 1px 0 var(--blue);}
+#fileInput{display:none;}
+.grid{max-width:1100px;margin:26px auto 0;padding:0 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:26px;}
+.card{background:#fff;border-radius:6px;border:1px solid var(--line);overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.04);transition:transform .2s ease;}
+.card:hover{transform:translateY(-2px);}
+.cover-wrap{position:relative;width:100%;aspect-ratio:3/4;background:#f9f7f2;overflow:hidden;}
+.cover-wrap img{width:100%;height:100%;object-fit:cover;}
+.del-btn{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.45);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;}
+.cover-wrap:hover .del-btn{opacity:1;}
+.empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft);font-size:15px;}
+.overlay{position:fixed;inset:0;background:rgba(30,20,28,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:100;}
+.overlay.show{display:flex;}
+.modal{background:var(--paper);width:100%;max-width:460px;max-height:88vh;overflow-y:auto;border-radius:6px;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.3);border-top:4px solid var(--second-text);}
+.modal h2{font-family:'Noto Serif SC',serif;font-size:19px;color:var(--main-text);margin-bottom:4px;text-align:center;}
+.modal .hint{font-size:12px;color:var(--second-text);margin-bottom:18px;}
+.drop-zone{border:2px dashed var(--line);border-radius:6px;padding:26px 16px;text-align:center;cursor:pointer;color:var(--second-text);font-size:13px;margin-bottom:16px;transition:border-color .2s ease,background .2s ease;}
+.drop-zone:hover{border-color:var(--blue);background:rgba(75,170,199,.06);}
+.preview-thumb{width:100%;max-height:220px;object-fit:contain;border-radius:4px;margin-bottom:14px;display:none;}
+.error-line{font-size:12px;color:var(--seal);margin-bottom:10px;display:none;}
+.error-line.show{display:block;}
+.modal-actions{display:flex;gap:10px;margin-top:18px;}
+.btn{flex:1;padding:10px 14px;border-radius:3px;border:none;font-family:'Noto Serif SC',serif;font-weight:600;font-size:13.5px;cursor:pointer;letter-spacing:1px;}
+.btn-primary{background:var(--second-text);color:var(--paper);}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed;}
+.btn-ghost{background:transparent;color:var(--second-text);border:1px solid var(--line);}
+.lightbox{position:fixed;inset:0;background:rgba(20,17,13,.92);display:none;align-items:center;justify-content:center;z-index:200;padding:40px 16px;touch-action:pan-y;}
+.lightbox.show{display:flex;}
+.lightbox-img-wrap{max-width:100%;max-height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.lightbox img{max-width:100%;max-height:88vh;object-fit:contain;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,.5);user-select:none;}
+.lightbox-close{position:absolute;top:18px;right:22px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.lightbox-close:hover{background:rgba(255,255,255,.22);}
+.lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.lightbox-nav:hover{background:rgba(255,255,255,.22);}
+.lightbox-nav.prev{left:18px;}
+.lightbox-nav.next{right:18px;}
+.lightbox-nav:disabled{opacity:.25;cursor:default;}
+.lightbox-counter{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.75);font-size:12.5px;letter-spacing:1px;}
+@media (max-width:520px){.hero h1{font-size:30px;}.grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;}.lightbox-nav{width:38px;height:38px;font-size:18px;}.lightbox-nav.prev{left:6px;}.lightbox-nav.next{right:6px;}}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="hero">
+<div class="hero-content">
+<div class="author">ALICIA CHAI</div>
+<h1>小说打卡</h1>
+<div class="location">潇湘｜晋江</div>
+</div>
+</header>
+<svg class="svg-filter" aria-hidden="true">
+<filter id="wrinkle">
+<feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="8" result="noise"/>
+<feDisplacementMap in="SourceGraphic" in2="noise" scale="12" xChannelSelector="R" yChannelSelector="G"/>
+</filter>
+</svg>
+<div class="tabbar">
+<button class="tab active" data-cat="古言">古言小说 <span class="count" id="countGuyan">(0)</span></button>
+<button class="tab" data-cat="言情">言情小说 <span class="count" id="countYanqing">(0)</span></button>
+</div>
+<div class="toolbar">
+<div class="toolbar-note" id="toolbarNote">💡 上传封面后自动同步</div>
+<button class="upload-btn" id="openModalBtn">＋ 上传图片</button>
+</div>
+<input type="file" id="fileInput" accept="image/*">
+<div class="lightbox" id="lightbox">
+<button class="lightbox-close" id="lightboxClose">✕</button>
+<button class="lightbox-nav prev" id="lightboxPrev">‹</button>
+<div class="lightbox-img-wrap"><img id="lightboxImg" src="" alt="放大查看"></div>
+<button class="lightbox-nav next" id="lightboxNext">›</button>
+<div class="lightbox-counter" id="lightboxCounter"></div>
+</div>
+<div class="overlay" id="overlay">
+<div class="modal">
+<h2>上传图片</h2>
+<div class="drop-zone" id="dropZone">点击选择图片，或拖拽图片到此处</div>
+<img class="preview-thumb" id="previewThumb">
+<div class="error-line" id="errorLine"></div>
+<div class="modal-actions">
+<button class="btn btn-ghost" id="cancelBtn">取消</button>
+<button class="btn btn-primary" id="saveBtn" disabled>加入书架</button>
+</div>
+</div>
+</div>
+<div class="grid" id="grid"></div>
+<div class="empty-state" id="emptyState">暂无封面，点击上方按钮上传</div>
+</div>
+<script>
+// ========== ✅ 已自动填好，无需修改！ ==========
+const CFG = {
+  USER: "AliciaChai",
+  REPO: "novel-app",
+  FILE: "data.json",
+  TOKEN: "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"
+};
+const CONFIG={MAX_WIDTH:900,MAX_FILE_SIZE_MB:2,JPEG_QUALITY:.85,LOAD_TIMEOUT:30000};
+let currentCat="古言",entries=[],currentFiltered=[],pendingImageBase64=null,isProcessing=false,lbIndex=0,fileSha=null;
+const grid=document.getElementById("grid"),emptyState=document.getElementById("emptyState"),overlay=document.getElementById("overlay"),dropZone=document.getElementById("dropZone"),fileInput=document.getElementById("fileInput"),previewThumb=document.getElementById("previewThumb"),saveBtn=document.getElementById("saveBtn"),errorLine=document.getElementById("errorLine"),openModalBtn=document.getElementById("openModalBtn"),lightbox=document.getElementById("lightbox"),lightboxImg=document.getElementById("lightboxImg"),lightboxCounter=document.getElementById("lightboxCounter"),lightboxPrev=document.getElementById("lightboxPrev"),lightboxNext=document.getElementById("lightboxNext");
+async function api(m,body){
+  const u=`https://api.github.com/repos/${CFG.USER}/${CFG.REPO}/contents/${CFG.FILE}`;
+  const h={"Authorization":`token ${CFG.TOKEN}`,"Content-Type":"application/json","Accept":"application/vnd.github.v3+json"};
+  try{
+    const r=await fetch(u,{method:m,headers:h,body:body?JSON.stringify(body):void 0});
+    if(r.status===404)return null;
+    if(!r.ok)throw new Error(`GitHub API: ${r.status}`);
+    return r.json();
+  }catch(e){throw new Error("网络错误：检查Token权限是否正确");}
+}
+async function loadData(){const d=await api("GET");if(!d)return{entries:[]};fileSha=d.sha;return JSON.parse(atob(d.content));}
+async function saveData(data){const c=btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2))));const b={content:c,message:`update: ${new Date().toLocaleString()}`};if(fileSha)b.sha=fileSha;const r=await api("PUT",b);fileSha=r.content.sha;return r;}
+function showError(m){errorLine.textContent=m;errorLine.classList.add("show");}
+function clearError(){errorLine.textContent="";errorLine.classList.remove("show");}
+function setButtonState(l){saveBtn.disabled=l;saveBtn.textContent=l?"同步中…":"加入书架";openModalBtn.disabled=l;}
+function isValidImageType(t){return/^image\/(jpeg|jpg|png|gif|webp)$/i.test(t);}
+function escapeHtml(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML;}
+document.querySelectorAll(".tab").forEach(t=>{t.addEventListener("click",()=>{if(isProcessing)return;document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");currentCat=t.dataset.cat||"古言";render();});});
+openModalBtn.addEventListener("click",openModal);document.getElementById("cancelBtn").addEventListener("click",closeModal);
+function openModal(){if(isProcessing)return;resetModal();overlay.classList.add("show");}
+function closeModal(){overlay.classList.remove("show");resetModal();}
+function resetModal(){pendingImageBase64=null;previewThumb.style.display="none";previewThumb.src="";clearError();saveBtn.disabled=true;fileInput.value="";}
+dropZone.addEventListener("click",()=>fileInput.click());
+dropZone.addEventListener("dragover",e=>{e.preventDefault();dropZone.style.borderColor="var(--gold)";});
+["dragleave","dragend"].forEach(e=>dropZone.addEventListener(e,()=>dropZone.style.borderColor=""));
+dropZone.addEventListener("drop",e=>{e.preventDefault();dropZone.style.borderColor="";if(isProcessing)return;const f=e.dataTransfer.files?.[0];f&&handleFile(f);});
+fileInput.addEventListener("change",e=>{if(isProcessing)return;const f=e.target.files?.[0];f&&handleFile(f);});
+async function handleFile(f){
+  clearError();if(!f||!isValidImageType(f.type))return showError("请上传 JPG/PNG/GIF/WebP 格式图片");
+  if(f.size>CONFIG.MAX_FILE_SIZE_MB*1024*1024)return showError(`文件超过 ${CONFIG.MAX_FILE_SIZE_MB}MB`);
+  isProcessing=true;dropZone.textContent="正在处理…";pendingImageBase64=null;saveBtn.disabled=true;
+  try{
+    const r=new FileReader(),rd=new Promise((s,f)=>{r.onload=x=>s(x.target?.result);r.onerror=()=>f(new Error("读取失败"));setTimeout(()=>f(new Error("读取超时")),CONFIG.LOAD_TIMEOUT);});
+    r.readAsDataURL(f);const du=await rd;
+    const i=new Image(),im=new Promise((s,f)=>{i.onload=s;i.onerror=()=>f(new Error("图片损坏"));setTimeout(()=>f(new Error("加载超时")),CONFIG.LOAD_TIMEOUT);});
+    i.src=du;await im;
+    const sc=Math.min(1,CONFIG.MAX_WIDTH/i.width),c=document.createElement("canvas");
+    c.width=Math.round(i.width*sc);c.height=Math.round(i.height*sc);
+    const ctx=c.getContext("2d");if(!ctx)throw new Error("不支持画布");
+    ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(i,0,0,c.width,c.height);
+    const jd=c.toDataURL("image/jpeg",CONFIG.JPEG_QUALITY);
+    if(!jd||jd==="data:,")throw new Error("编码失败");
+    pendingImageBase64=jd;previewThumb.src=jd;previewThumb.style.display="block";
+    saveBtn.disabled=false;dropZone.textContent="点击更换图片";
+  }catch(e){console.error(e);showError(e?.message||"处理失败");dropZone.textContent="点击选择图片";}
+  finally{isProcessing=false;}
+}
+saveBtn.addEventListener("click",async()=>{
+  if(isProcessing)return;if(!pendingImageBase64)return showError("请先选择封面图片");
+  isProcessing=true;setButtonState(true);clearError();
+  try{
+    entries.push({id:`novel_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,category:currentCat,cover:pendingImageBase64,createdAt:Date.now()});
+    await saveData({entries});closeModal();render();
+  }catch(e){console.error(e);showError(e?.message||"保存失败");}
+  finally{isProcessing=false;setButtonState(false);}
+});
+window.deleteEntry=async function(id){
+  if(isProcessing||!id)return;if(!confirm("确定删除？不可恢复。"))return;
+  isProcessing=true;try{entries=entries.filter(x=>x.id!==id);await saveData({entries});render();}
+  catch(e){console.error(e);alert("删除失败");}finally{isProcessing=false;}
+};
+function render(){
+  try{
+    const f=entries.filter(x=>x&&x.category===currentCat).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    currentFiltered=f;
+    document.getElementById("countGuyan").textContent=`(${entries.filter(x=>x&&x.category==="古言").length})`;
+    document.getElementById("countYanqing").textContent=`(${entries.filter(x=>x&&x.category==="言情").length})`;
+    if(!f.length){grid.innerHTML="";emptyState.style.display="block";return;}
+    emptyState.style.display="none";
+    grid.innerHTML=f.map((e,i)=>e&&e.cover?`<div class="card"><div class="cover-wrap"><img src="${escapeHtml(e.cover)}" alt="封面" loading="lazy" onclick="openLightbox(${i})" style="cursor:zoom-in;"><button class="del-btn" onclick="deleteEntry('${escapeHtml(e.id)}')" title="删除">✕</button></div></div>`:"").join("");
+  }catch(e){console.error(e);grid.innerHTML='<div class="empty-state">渲染出错，请刷新重试</div>';}
+}
+window.openLightbox=function(i){if(!currentFiltered?.[i]?.cover)return;lbIndex=i;updateLightbox();lightbox.classList.add("show");document.body.style.overflow="hidden";};
+function closeLightbox(){lightbox.classList.remove("show");document.body.style.overflow="";}
+function updateLightbox(){const x=currentFiltered?.[lbIndex];if(!x)return;lightboxImg.src=x.cover;lightboxCounter.textContent=`${lbIndex+1} / ${currentFiltered.length||1}`;lightboxPrev.disabled=lbIndex<=0;lightboxNext.disabled=lbIndex>=(currentFiltered.length-1);}
+function lbPrev(){lbIndex>0&&(lbIndex--,updateLightbox());}
+function lbNext(){currentFiltered&&lbIndex<currentFiltered.length-1&&(lbIndex++,updateLightbox());}
+document.getElementById("lightboxClose").addEventListener("click",closeLightbox);
+lightboxPrev.addEventListener("click",lbPrev);lightboxNext.addEventListener("click",lbNext);
+lightbox.addEventListener("click",e=>{e.target===lightbox&&closeLightbox();});
+document.addEventListener("keydown",e=>{if(!lightbox.classList.contains("show"))return;e.key==="Escape"&&closeLightbox();e.key==="ArrowLeft"&&lbPrev();e.key==="ArrowRight"&&lbNext();});
+let tx=null;lightbox.addEventListener("touchstart",e=>{tx=e.changedTouches[0].clientX;},{passive:true});
+lightbox.addEventListener("touchend",e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;Math.abs(dx)>50&&(dx<0?lbNext():lbPrev());tx=null;},{passive:true});
+(async()=>{try{const d=await loadData();entries=d.entries||[];}catch(e){console.warn("加载失败:",e);entries=[];}render();})();
+</script>
+</body>
+</html>
